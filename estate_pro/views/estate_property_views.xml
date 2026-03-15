@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- Tree View - العقارات                    -->
+    <!-- ═══════════════════════════════════════ -->
+    <record id="estate_property_view_tree" model="ir.ui.view">
+        <field name="name">estate.property.tree</field>
+        <field name="model">estate.property</field>
+        <field name="arch" type="xml">
+            <tree string="العقارات" decoration-success="status=='available'"
+                  decoration-warning="status=='rented' and days_to_expire &lt;= 60 and days_to_expire &gt; 0"
+                  decoration-danger="status=='expired' or (status=='rented' and days_to_expire &lt;= 0)"
+                  decoration-muted="status=='maintenance'"
+                  decoration-info="status=='sold'">
+                <field name="ref"/>
+                <field name="name"/>
+                <field name="property_type"/>
+                <field name="city"/>
+                <field name="district"/>
+                <field name="area"/>
+                <field name="price"/>
+                <field name="monthly_rent"/>
+                <field name="tenant_name"/>
+                <field name="contract_end"/>
+                <field name="days_to_expire"/>
+                <field name="days_to_payment"/>
+                <field name="status"/>
+                <field name="color" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- Form View - العقار                      -->
+    <!-- ═══════════════════════════════════════ -->
+    <record id="estate_property_view_form" model="ir.ui.view">
+        <field name="name">estate.property.form</field>
+        <field name="model">estate.property</field>
+        <field name="arch" type="xml">
+            <form string="العقار">
+                <header>
+                    <button name="action_set_rented" string="تأجير" type="object"
+                        class="btn-primary"
+                        invisible="status == 'rented'"/>
+                    <button name="action_set_available" string="إخلاء" type="object"
+                        class="btn-warning"
+                        invisible="status == 'available'"/>
+                    <button name="action_set_maintenance" string="صيانة" type="object"
+                        invisible="status == 'maintenance'"/>
+                    <field name="status" widget="statusbar"
+                        statusbar_visible="available,rented,expired,maintenance,sold"/>
+                </header>
+                <sheet>
+                    <!-- تنبيه انتهاء العقد -->
+                    <div class="alert alert-danger" role="alert"
+                        invisible="not (status == 'rented' and days_to_expire &lt;= 7 and days_to_expire &gt;= 0)">
+                        🚨 <strong>تنبيه عاجل:</strong> ينتهي العقد خلال <field name="days_to_expire"/> أيام!
+                    </div>
+                    <div class="alert alert-warning" role="alert"
+                        invisible="not (status == 'rented' and days_to_expire &lt;= 30 and days_to_expire &gt; 7)">
+                        ⚠️ <strong>تنبيه:</strong> ينتهي العقد خلال <field name="days_to_expire"/> يوماً.
+                    </div>
+                    <div class="alert alert-danger" role="alert"
+                        invisible="status != 'expired'">
+                        🔴 <strong>منتهي:</strong> انتهى عقد هذا العقار. يرجى المراجعة.
+                    </div>
+                    <div class="alert alert-info" role="alert"
+                        invisible="not (status == 'rented' and days_to_payment &lt;= 3 and days_to_payment &gt;= 0)">
+                        💰 <strong>تذكير:</strong> موعد السداد بعد <field name="days_to_payment"/> أيام بتاريخ <field name="next_payment_date"/>.
+                    </div>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="اسم العقار"/>
+                        </h1>
+                        <h4><field name="ref" readonly="1"/></h4>
+                    </div>
+
+                    <group>
+                        <group string="معلومات العقار">
+                            <field name="property_type"/>
+                            <field name="listing_type"/>
+                            <field name="price"/>
+                            <field name="monthly_rent" readonly="1"/>
+                            <field name="area"/>
+                            <field name="bedrooms"/>
+                            <field name="bathrooms"/>
+                            <field name="floor"/>
+                        </group>
+                        <group string="الموقع">
+                            <field name="city"/>
+                            <field name="district"/>
+                            <field name="street"/>
+                            <field name="address" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <!-- بيانات العقد والمستأجر -->
+                        <page string="🏠 بيانات العقد">
+                            <group>
+                                <group string="المستأجر">
+                                    <field name="tenant_name"/>
+                                    <field name="tenant_phone"/>
+                                    <field name="tenant_email"/>
+                                    <field name="tenant_id"/>
+                                </group>
+                                <group string="العقد">
+                                    <field name="contract_start"/>
+                                    <field name="contract_end"/>
+                                    <field name="contract_duration" readonly="1"/>
+                                    <field name="contract_status" readonly="1"/>
+                                    <field name="days_to_expire" readonly="1"/>
+                                    <field name="payment_day"/>
+                                    <field name="next_payment_date" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- المدفوعات -->
+                        <page string="💰 المدفوعات">
+                            <group>
+                                <group string="ملخص مالي">
+                                    <field name="monthly_rent" readonly="1"/>
+                                    <field name="total_paid" readonly="1"/>
+                                    <field name="total_remaining" readonly="1"/>
+                                </group>
+                            </group>
+                            <field name="payment_ids">
+                                <tree string="المدفوعات" editable="bottom"
+                                    decoration-success="state=='paid'"
+                                    decoration-danger="state=='late'"
+                                    decoration-warning="state=='pending'">
+                                    <field name="name" readonly="1"/>
+                                    <field name="period"/>
+                                    <field name="amount"/>
+                                    <field name="due_date"/>
+                                    <field name="payment_date"/>
+                                    <field name="payment_method"/>
+                                    <field name="state"/>
+                                    <button name="action_mark_paid" string="✅ تسديد"
+                                        type="object" class="btn-success"
+                                        invisible="state == 'paid'"/>
+                                    <button name="action_print_invoice" string="🖨️ فاتورة"
+                                        type="object" class="btn-primary"
+                                        invisible="state != 'paid'"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- بيانات المالك -->
+                        <page string="👤 بيانات المالك">
+                            <group>
+                                <field name="owner_name"/>
+                                <field name="owner_phone"/>
+                                <field name="owner_email"/>
+                                <field name="owner_id"/>
+                            </group>
+                        </page>
+
+                        <!-- المرافق -->
+                        <page string="🏢 المرافق">
+                            <group>
+                                <group>
+                                    <field name="has_parking"/>
+                                    <field name="has_elevator"/>
+                                    <field name="has_pool"/>
+                                </group>
+                                <group>
+                                    <field name="has_gym"/>
+                                    <field name="has_security"/>
+                                    <field name="has_ac"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- ملاحظات -->
+                        <page string="📝 ملاحظات">
+                            <field name="notes" placeholder="أضف ملاحظاتك هنا..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- Kanban View - ملون                      -->
+    <!-- ═══════════════════════════════════════ -->
+    <record id="estate_property_view_kanban" model="ir.ui.view">
+        <field name="name">estate.property.kanban</field>
+        <field name="model">estate.property</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="property_type"/>
+                <field name="price"/>
+                <field name="monthly_rent"/>
+                <field name="city"/>
+                <field name="status"/>
+                <field name="color"/>
+                <field name="tenant_name"/>
+                <field name="days_to_expire"/>
+                <field name="days_to_payment"/>
+                <field name="contract_end"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click oe_kanban_color_#{record.color.raw_value}">
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title">
+                                    <field name="name"/>
+                                </strong>
+                                <div class="o_kanban_tags_section">
+                                    <span class="badge badge-pill badge-secondary">
+                                        <field name="property_type"/>
+                                    </span>
+                                </div>
+                                <ul>
+                                    <li t-if="record.city.value">
+                                        📍 <field name="city"/>
+                                    </li>
+                                    <li>
+                                        💰 <field name="monthly_rent"/> ر.س/شهر
+                                    </li>
+                                    <li t-if="record.tenant_name.value">
+                                        👤 <field name="tenant_name"/>
+                                    </li>
+                                    <li t-if="record.contract_end.value">
+                                        📅 <field name="contract_end"/>
+                                    </li>
+                                    <li t-if="record.days_to_expire.raw_value &lt;= 30 and record.days_to_expire.raw_value &gt; 0">
+                                        ⚠️ ينتهي خلال <field name="days_to_expire"/> يوم
+                                    </li>
+                                    <li t-if="record.days_to_payment.raw_value &lt;= 3 and record.days_to_payment.raw_value &gt;= 0">
+                                        💳 السداد بعد <field name="days_to_payment"/> أيام
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- Search View                             -->
+    <!-- ═══════════════════════════════════════ -->
+    <record id="estate_property_view_search" model="ir.ui.view">
+        <field name="name">estate.property.search</field>
+        <field name="model">estate.property</field>
+        <field name="arch" type="xml">
+            <search string="بحث في العقارات">
+                <field name="name" string="اسم العقار"/>
+                <field name="ref" string="رقم العقار"/>
+                <field name="city" string="المدينة"/>
+                <field name="tenant_name" string="المستأجر"/>
+                <field name="owner_name" string="المالك"/>
+                <separator/>
+                <filter name="available" string="🟢 متاح" domain="[('status','=','available')]"/>
+                <filter name="rented" string="🟡 مؤجر" domain="[('status','=','rented')]"/>
+                <filter name="expired" string="🔴 منتهي" domain="[('status','=','expired')]"/>
+                <filter name="maintenance" string="⚙️ صيانة" domain="[('status','=','maintenance')]"/>
+                <separator/>
+                <filter name="expiring_30" string="⚠️ ينتهي خلال 30 يوم"
+                    domain="[('status','=','rented'),('days_to_expire','&lt;=',30),('days_to_expire','&gt;',0)]"/>
+                <filter name="payment_due" string="💰 موعد سداد قريب"
+                    domain="[('status','=','rented'),('days_to_payment','&lt;=',3)]"/>
+                <separator/>
+                <filter name="for_rent" string="للإيجار" domain="[('listing_type','=','rent')]"/>
+                <filter name="for_sale" string="للبيع" domain="[('listing_type','=','sale')]"/>
+                <group expand="0" string="تجميع حسب">
+                    <filter name="group_type" string="نوع العقار" context="{'group_by':'property_type'}"/>
+                    <filter name="group_city" string="المدينة" context="{'group_by':'city'}"/>
+                    <filter name="group_status" string="الحالة" context="{'group_by':'status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- Action                                  -->
+    <!-- ═══════════════════════════════════════ -->
+    <record id="estate_property_action" model="ir.actions.act_window">
+        <field name="name">العقارات</field>
+        <field name="res_model">estate.property</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="context">{'search_default_group_status': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                أضف أول عقار! 🏠
+            </p>
+        </field>
+    </record>
+
+    <!-- Action للعقارات المنتهية -->
+    <record id="estate_expiring_action" model="ir.actions.act_window">
+        <field name="name">⚠️ عقود تنتهي قريباً</field>
+        <field name="res_model">estate.property</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('status','=','rented'),('days_to_expire','&lt;=',30),('days_to_expire','&gt;=',0)]</field>
+    </record>
+
+    <!-- Action للمدفوعات المتأخرة -->
+    <record id="estate_payment_due_action" model="ir.actions.act_window">
+        <field name="name">💰 مواعيد السداد القادمة</field>
+        <field name="res_model">estate.property</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('status','=','rented'),('days_to_payment','&lt;=',7)]</field>
+    </record>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- نموذج الدفعة المستقل                   -->
+    <!-- ═══════════════════════════════════════ -->
+    <record id="estate_payment_view_form" model="ir.ui.view">
+        <field name="name">estate.payment.form</field>
+        <field name="model">estate.payment</field>
+        <field name="arch" type="xml">
+            <form string="الدفعة">
+                <header>
+                    <button name="action_mark_paid" string="✅ تسديد"
+                        type="object" class="btn-success"
+                        invisible="state == 'paid'"/>
+                    <field name="state" widget="statusbar"
+                        statusbar_visible="pending,paid,late"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="بيانات الدفعة">
+                            <field name="property_id" readonly="1"/>
+                            <field name="period"/>
+                            <field name="amount"/>
+                            <field name="due_date"/>
+                            <field name="payment_date"/>
+                            <field name="payment_method"/>
+                        </group>
+                        <group string="بيانات العقار">
+                            <field name="property_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="notes" placeholder="ملاحظات..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree view للدفعات -->
+    <record id="estate_payment_view_tree" model="ir.ui.view">
+        <field name="name">estate.payment.tree</field>
+        <field name="model">estate.payment</field>
+        <field name="arch" type="xml">
+            <tree string="المدفوعات"
+                decoration-success="state=='paid'"
+                decoration-danger="state=='late'"
+                decoration-warning="state=='pending'">
+                <field name="name"/>
+                <field name="property_id"/>
+                <field name="period"/>
+                <field name="amount"/>
+                <field name="due_date"/>
+                <field name="payment_date"/>
+                <field name="payment_method"/>
+                <field name="state"/>
+                <button name="action_mark_paid" string="✅ تسديد"
+                    type="object" class="btn-success"
+                    invisible="state == 'paid'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action للدفعات -->
+    <record id="estate_payment_action" model="ir.actions.act_window">
+        <field name="name">💰 كل المدفوعات</field>
+        <field name="res_model">estate.payment</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- قائمة المدفوعات -->
+    <menuitem id="menu_estate_all_payments"
+        name="💰 كل المدفوعات"
+        parent="menu_estate_root"
+        action="estate_payment_action"
+        sequence="40"/>
+
+</odoo>

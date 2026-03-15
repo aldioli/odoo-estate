@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="report_estate_invoice_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+            <div class="article o_report_layout_standard" style="font-family: 'Cairo', Arial, sans-serif; direction: rtl; padding: 20px; background: white;">
+
+                <!-- ══════════════════════════════ -->
+                <!-- رأس الفاتورة                  -->
+                <!-- ══════════════════════════════ -->
+                <div style="border-bottom: 3px solid #2C3E50; margin-bottom: 20px; padding-bottom: 15px;">
+                    <div class="row">
+
+                        <!-- شعار + معلومات الشركة -->
+                        <div class="col-5">
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                                <t t-if="doc.env.company.logo">
+                                    <img t-att-src="image_data_uri(doc.env.company.logo)"
+                                         style="max-height: 60px; max-width: 120px;"/>
+                                </t>
+                                <strong style="font-size: 16px; color: #2C3E50;">
+                                    <span t-esc="doc.env.company.name"/>
+                                </strong>
+                            </div>
+                            <table style="width:100%; font-size: 11px;">
+                                <t t-if="doc.env.company.vat">
+                                <tr>
+                                    <td style="color:#666; width:40%;">الرقم الضريبي:</td>
+                                    <td><strong><span t-esc="doc.env.company.vat"/></strong></td>
+                                </tr>
+                                </t>
+                                <tr>
+                                    <td style="color:#666;">الهاتف:</td>
+                                    <td><span t-esc="doc.env.company.phone"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="color:#666;">البريد:</td>
+                                    <td><span t-esc="doc.env.company.email"/></td>
+                                </tr>
+                                <tr>
+                                    <td style="color:#666;">العنوان:</td>
+                                    <td><span t-esc="doc.env.company.street"/></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- عنوان الفاتورة -->
+                        <div class="col-4 text-center">
+                            <div style="background: linear-gradient(135deg, #2C3E50, #3498DB); color: white; padding: 15px; border-radius: 10px;">
+                                <h2 style="margin: 0; font-size: 22px;">فاتورة إيجار</h2>
+                                <h4 style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;">Rent Invoice</h4>
+                            </div>
+                            <div class="mt-2" style="background-color: #f8f9fa; padding: 8px; border-radius: 5px; border: 1px solid #dee2e6;">
+                                <small style="color: #666;">رقم الفاتورة</small><br/>
+                                <strong style="font-size: 15px; color: #2C3E50;">
+                                    <span t-field="doc.name"/>
+                                </strong>
+                            </div>
+                            <div class="mt-2" style="background-color: #f8f9fa; padding: 8px; border-radius: 5px; border: 1px solid #dee2e6;">
+                                <small style="color: #666;">تاريخ الإصدار</small><br/>
+                                <strong style="color: #2C3E50;">
+                                    <span t-field="doc.payment_date"/>
+                                </strong>
+                            </div>
+                        </div>
+
+                        <!-- باركود + QR -->
+                        <div class="col-3 text-center">
+                            <div class="mb-2">
+                                <small style="color: #666; font-size: 10px;">باركود الفاتورة</small><br/>
+                                <img t-att-src="'/report/barcode/Code128/' + doc.name"
+                                     style="height: 35px; max-width: 130px;"/>
+                                <br/>
+                                <small style="color: #666; font-size: 9px;"><span t-esc="doc.name"/></small>
+                            </div>
+                            <t t-if="doc.env.company.vat">
+                                <div>
+                                    <small style="color: #666; font-size: 10px;">QR الرقم الضريبي</small><br/>
+                                    <img t-att-src="'/report/barcode/QR/' + doc.env.company.vat"
+                                         style="height: 100px; width: 100px;"/>
+                                </div>
+                            </t>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- بيانات الطرفين -->
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <div style="background-color: #EBF5FB; border-right: 4px solid #3498DB; padding: 10px; border-radius: 5px;">
+                            <h6 style="color: #2C3E50; margin-bottom: 8px; font-weight: bold;">👤 بيانات المستأجر</h6>
+                            <table style="width: 100%; font-size: 11px;">
+                                <tr><td style="color:#666; width:40%;">الاسم:</td><td><strong><span t-field="doc.property_id.tenant_name"/></strong></td></tr>
+                                <tr><td style="color:#666;">الهاتف:</td><td><span t-field="doc.property_id.tenant_phone"/></td></tr>
+                                <tr><td style="color:#666;">البريد:</td><td><span t-field="doc.property_id.tenant_email"/></td></tr>
+                                <tr><td style="color:#666;">رقم الهوية:</td><td><span t-field="doc.property_id.tenant_id"/></td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div style="background-color: #EAFAF1; border-right: 4px solid #27AE60; padding: 10px; border-radius: 5px;">
+                            <h6 style="color: #2C3E50; margin-bottom: 8px; font-weight: bold;">🏠 بيانات العقار</h6>
+                            <table style="width: 100%; font-size: 11px;">
+                                <tr><td style="color:#666; width:40%;">اسم العقار:</td><td><strong><span t-field="doc.property_id.name"/></strong></td></tr>
+                                <tr><td style="color:#666;">رقم العقار:</td><td><span t-field="doc.property_id.ref"/></td></tr>
+                                <tr><td style="color:#666;">الموقع:</td><td><span t-field="doc.property_id.address"/></td></tr>
+                                <tr><td style="color:#666;">مدة العقد:</td><td><span t-field="doc.property_id.contract_start"/> ← <span t-field="doc.property_id.contract_end"/></td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تفاصيل الدفعة -->
+                <h6 style="color: #2C3E50; font-weight: bold; margin-bottom: 8px;">💰 تفاصيل الدفعة</h6>
+                <table class="table table-bordered" style="font-size: 11px;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #2C3E50, #3498DB); color: white; text-align: center;">
+                            <th>#</th>
+                            <th>الوصف</th>
+                            <th>الفترة</th>
+                            <th>تاريخ الاستحقاق</th>
+                            <th>طريقة الدفع</th>
+                            <th>المبلغ قبل الضريبة</th>
+                            <th>ضريبة 15%</th>
+                            <th>الإجمالي شامل الضريبة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-center">1</td>
+                            <td>إيجار - <span t-field="doc.property_id.name"/></td>
+                            <td class="text-center"><span t-field="doc.period"/></td>
+                            <td class="text-center"><span t-field="doc.due_date"/></td>
+                            <td class="text-center"><span t-field="doc.payment_method"/></td>
+                            <td class="text-center">
+                                <span t-field="doc.amount" t-options='{"widget": "monetary", "display_currency": doc.env.company.currency_id}'/>
+                            </td>
+                            <td class="text-center">
+                                <span t-esc="'%.2f' % (doc.amount * 0.15)"/> <span t-esc="doc.env.company.currency_id.symbol"/>
+                            </td>
+                            <td class="text-center">
+                                <strong style="color: #2C3E50;">
+                                    <span t-esc="'%.2f' % (doc.amount * 1.15)"/> <span t-esc="doc.env.company.currency_id.symbol"/>
+                                </strong>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- ملخص مالي -->
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <t t-if="doc.notes">
+                            <div style="background-color: #FEF9E7; border: 1px solid #F39C12; padding: 10px; border-radius: 5px;">
+                                <h6 style="color: #F39C12; margin-bottom:5px;">📝 ملاحظات</h6>
+                                <p style="font-size: 11px; margin: 0;"><span t-field="doc.notes"/></p>
+                            </div>
+                        </t>
+                    </div>
+                    <div class="col-6">
+                        <div style="background-color: #2C3E50; color: white; padding: 12px; border-radius: 5px; font-size: 11px;">
+                            <table style="width: 100%;">
+                                <tr>
+                                    <td>إجمالي المدفوع للعقار:</td>
+                                    <td class="text-right"><span t-field="doc.property_id.total_paid" t-options='{"widget": "monetary", "display_currency": doc.env.company.currency_id}'/></td>
+                                </tr>
+                                <tr>
+                                    <td>المبلغ المتبقي:</td>
+                                    <td class="text-right"><span t-field="doc.property_id.total_remaining" t-options='{"widget": "monetary", "display_currency": doc.env.company.currency_id}'/></td>
+                                </tr>
+                                <tr style="border-top: 1px solid rgba(255,255,255,0.3); padding-top:5px;">
+                                    <td>هذه الدفعة قبل الضريبة:</td>
+                                    <td class="text-right"><span t-field="doc.amount" t-options='{"widget": "monetary", "display_currency": doc.env.company.currency_id}'/></td>
+                                </tr>
+                                <tr>
+                                    <td>ضريبة القيمة المضافة 15%:</td>
+                                    <td class="text-right"><span t-esc="'%.2f' % (doc.amount * 0.15)"/> <span t-esc="doc.env.company.currency_id.symbol"/></td>
+                                </tr>
+                                <tr style="border-top: 2px solid rgba(255,255,255,0.5);">
+                                    <td><strong style="font-size: 13px;">الإجمالي شامل الضريبة:</strong></td>
+                                    <td class="text-right">
+                                        <strong style="font-size: 15px; color: #F1C40F;">
+                                            <span t-esc="'%.2f' % (doc.amount * 1.15)"/> <span t-esc="doc.env.company.currency_id.symbol"/>
+                                        </strong>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- حالة الدفع -->
+                <div class="text-center mb-3">
+                    <div t-if="doc.state == 'paid'" style="display:inline-block; background-color:#27AE60; color:white; padding:8px 30px; border-radius:25px; font-size:15px; font-weight:bold;">✅ تم السداد</div>
+                    <div t-if="doc.state == 'pending'" style="display:inline-block; background-color:#F39C12; color:white; padding:8px 30px; border-radius:25px; font-size:15px; font-weight:bold;">⏳ معلق</div>
+                    <div t-if="doc.state == 'late'" style="display:inline-block; background-color:#E74C3C; color:white; padding:8px 30px; border-radius:25px; font-size:15px; font-weight:bold;">⚠️ متأخر</div>
+                </div>
+
+                <!-- التوقيعات -->
+                <div class="row mt-4">
+                    <div class="col-4 text-center">
+                        <div style="border-top: 2px solid #2C3E50; padding-top: 8px; margin-top: 50px;">
+                            <strong style="color: #2C3E50; font-size:12px;">توقيع المستأجر</strong><br/>
+                            <small><span t-field="doc.property_id.tenant_name"/></small>
+                        </div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div style="border-top: 2px solid #2C3E50; padding-top: 8px; margin-top: 50px;">
+                            <strong style="color: #2C3E50; font-size:12px;">الختم الرسمي</strong><br/>
+                            <small>Official Stamp</small>
+                        </div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div style="border-top: 2px solid #2C3E50; padding-top: 8px; margin-top: 50px;">
+                            <strong style="color: #2C3E50; font-size:12px;">توقيع المالك</strong><br/>
+                            <small><span t-field="doc.property_id.owner_name"/></small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تذييل -->
+                <div class="mt-3" style="background: linear-gradient(135deg, #2C3E50, #3498DB); color: white; padding: 10px 15px; border-radius: 5px; text-align: center;">
+                    <div class="row">
+                        <div class="col-4" style="font-size: 11px;">📍 <span t-esc="doc.env.company.street"/></div>
+                        <div class="col-4" style="font-size: 11px;">📞 <span t-esc="doc.env.company.phone"/></div>
+                        <div class="col-4" style="font-size: 11px;">✉️ <span t-esc="doc.env.company.email"/></div>
+                    </div>
+                </div>
+
+            </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_estate_invoice" model="ir.actions.report">
+        <field name="name">فاتورة إيجار احترافية</field>
+        <field name="model">estate.payment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">estate_pro.report_estate_invoice_document</field>
+        <field name="report_file">estate_pro.report_estate_invoice_document</field>
+        <field name="binding_model_id" ref="model_estate_payment"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'فاتورة-ايجار-' + (object.name or '')</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+</odoo>

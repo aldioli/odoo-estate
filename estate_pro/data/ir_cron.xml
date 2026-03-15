@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- تسلسل ترقيم العقارات -->
+    <record id="seq_estate_property" model="ir.sequence">
+        <field name="name">تسلسل العقارات</field>
+        <field name="code">estate.property</field>
+        <field name="prefix">PROP-</field>
+        <field name="padding">4</field>
+    </record>
+
+    <!-- تسلسل ترقيم المدفوعات -->
+    <record id="seq_estate_payment" model="ir.sequence">
+        <field name="name">تسلسل المدفوعات</field>
+        <field name="code">estate.payment</field>
+        <field name="prefix">PAY-</field>
+        <field name="padding">4</field>
+    </record>
+
+    <!-- مهمة تلقائية: تنبيهات انتهاء العقود - يومياً -->
+    <record id="cron_expiry_notifications" model="ir.cron">
+        <field name="name">تنبيهات انتهاء عقود العقارات</field>
+        <field name="model_id" ref="model_estate_property"/>
+        <field name="state">code</field>
+        <field name="code">model._send_expiry_notifications()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+    </record>
+
+    <!-- مهمة تلقائية: تنبيهات مواعيد السداد - يومياً -->
+    <record id="cron_payment_notifications" model="ir.cron">
+        <field name="name">تنبيهات مواعيد سداد الإيجار</field>
+        <field name="model_id" ref="model_estate_property"/>
+        <field name="state">code</field>
+        <field name="code">model._send_payment_notifications()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+    </record>
+
+    <!-- مهمة تلقائية: فحص التأخر في السداد -->
+    <record id="cron_late_payments" model="ir.cron">
+        <field name="name">فحص التأخر في سداد الإيجار</field>
+        <field name="model_id" ref="model_estate_payment"/>
+        <field name="state">code</field>
+        <field name="code">model._check_late_payments()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+    </record>
+
+</odoo>
