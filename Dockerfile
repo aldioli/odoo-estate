@@ -14,6 +14,6 @@ CMD odoo \
     --db_port=5432 \
     --db_user=$USER \
     --db_password=$PASSWORD \
-    --db_name=$DATABASE \
+    --database=$DATABASE \
     --http-port=8069 \
     --proxy-mode
