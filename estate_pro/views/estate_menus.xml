@@ -1,30 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-    <!-- القائمة الرئيسية -->
-    <menuitem id="menu_estate_root"
-        name="🏠 العقارات"
-        sequence="50"/>
-
-    <!-- العقارات -->
-    <menuitem id="menu_estate_properties"
-        name="كل العقارات"
-        parent="menu_estate_root"
-        action="estate_property_action"
-        sequence="10"/>
-
-    <!-- تنبيهات -->
-    <menuitem id="menu_estate_expiring"
-        name="⚠️ عقود تنتهي قريباً"
-        parent="menu_estate_root"
-        action="estate_expiring_action"
-        sequence="20"/>
-
-    <!-- مواعيد السداد -->
-    <menuitem id="menu_estate_payments"
-        name="💰 مواعيد السداد"
-        parent="menu_estate_root"
-        action="estate_payment_due_action"
-        sequence="30"/>
-
+<!--  القائمة الرئيسية  -->
+<menuitem id="menu_estate_root" name="🏠 العقارات" sequence="50"/>
+<!--  العقارات  -->
+<menuitem id="menu_estate_properties" name="كل العقارات" parent="menu_estate_root" action="estate_property_action" sequence="10"/>
+<!--  تنبيهات  -->
+<menuitem id="menu_estate_expiring" name="⚠️ عقود تنتهي قريباً" parent="menu_estate_root" action="estate_expiring_action" sequence="20"/>
+<!--  مواعيد السداد  -->
+<menuitem id="menu_estate_payments" name="💰 مواعيد السداد" parent="menu_estate_root" action="estate_payment_due_action" sequence="30"/>
+<!--  كل المدفوعات  -->
+<menuitem id="menu_estate_all_payments" name="💰 كل المدفوعات" parent="menu_estate_root" action="estate_payment_action" sequence="40"/>
 </odoo>
