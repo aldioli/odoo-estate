@@ -17,4 +17,4 @@ CMD odoo \
     --database=odoo_db_n5v9 \
     --http-port=8069 \
     --proxy-mode \
-    --workers=2
+    --dev=assets
