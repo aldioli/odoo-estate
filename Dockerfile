@@ -16,4 +16,5 @@ CMD odoo \
     --db_password=$PGPASSWORD \
     --database=odoo_db_n5v9 \
     --http-port=8069 \
-    --proxy-mode
+    --proxy-mode \
+    --workers=2
