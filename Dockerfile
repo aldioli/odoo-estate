@@ -14,5 +14,7 @@ CMD odoo \
     --db_port=5432 \
     --db_user=$PGUSER \
     --db_password=$PGPASSWORD \
+    --database=aldioli \
     --http-port=8069 \
+    --x-sendfile=False \
     --proxy-mode
