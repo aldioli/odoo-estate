@@ -15,5 +15,4 @@ CMD odoo \
     --db_user=$PGUSER \
     --db_password=$PGPASSWORD \
     --database=aldioli \
-    --http-port=8069 \
-    --proxy-mode
+    --http-port=8069
